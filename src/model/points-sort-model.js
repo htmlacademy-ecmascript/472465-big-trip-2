@@ -24,6 +24,11 @@ export class PointsSortModel {
     }
   }
 
+  resetPonts(newPoints) {
+    this.#defaultSortPoints = newPoints;
+    this.#timeSortPoints = null;
+    this.#priceSortPoints = null;
+  }
 
   #sortTimeUpHandle(a, b) {
     return dayjs(b.point.dateTo).diff(b.point.dateFrom, 'm') - dayjs(a.point.dateTo).diff(a.point.dateFrom, 'm');

@@ -1,4 +1,5 @@
 import { SortType } from '../utils/const.js';
+import { FilterType } from '../utils/const.js';
 import PointPresenter from './point-presenter.js';
 
 
@@ -11,6 +12,7 @@ export default class PointsListPresenter {
   #openedPoint = null;
   #pointsModel = null;
   #currentSortType = null;
+  #currentFilterType = null;
   #sortModel = null;
 
 
@@ -20,6 +22,7 @@ export default class PointsListPresenter {
     this.#citiesData = citiesData;
     this.#pointsModel = pointsModel;
     this.#currentSortType = SortType.DEFAULT;
+    this.#currentFilterType = FilterType.EVERETHING;
   }
 
   init(points = this.#pointsData) {
@@ -42,14 +45,26 @@ export default class PointsListPresenter {
     el.removePoint();
   }
 
-  onSortClick(sortType){
+  onFilterClick(filterType) {
+    if (filterType === this.#currentFilterType) {
+      return;
+    }
+    const filtredPoints = this.#pointsModel.getFilteredPoints(filterType);
+    this.#pointsModel.resetSortPoints(filtredPoints);
+    const sortedPoints = this.#pointsModel.getSortedPoints(this.#currentSortType);
+    this.#removePoints();
+    this.#currentFilterType = filterType;
+    this.init(sortedPoints);
+  }
+
+  onSortClick(sortType) {
     if (sortType === this.#currentSortType) {
       return;
     }
-    const points = this.#pointsModel.getSortedPoints(sortType);
+    const sortedPoints = this.#pointsModel.getSortedPoints(sortType);
     this.#removePoints();
     this.#currentSortType = sortType;
-    this.init(points);
+    this.init(sortedPoints);
   }
 
   #removePoints() {

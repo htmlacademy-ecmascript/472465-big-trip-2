@@ -4,6 +4,12 @@ export const EMPTY_MASSAGE = {
   Present: 'There are no present events now',
   Future: 'There are no future events now',
 };
+export const FilterType = {
+  EVERETHING: 'everthing',
+  PAST: 'past',
+  PRESENT: 'present',
+  FUTURE: 'future',
+};
 
 export const SortType = {
   EVENT: 'event',

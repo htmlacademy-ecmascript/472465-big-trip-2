@@ -27,7 +27,7 @@ export default class BoardPresenter {
       this.pointsModel,
     );
     this.sortComponent = new SortView(this.pointsList.onSortClick.bind(this.pointsList));
-    this.filterComponent = new FilterView(Object.keys(EMPTY_MASSAGE));
+    this.filterComponent = new FilterView(this.pointsList.onFilterClick.bind(this.pointsList));
   }
 
   init() {
