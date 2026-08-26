@@ -1,4 +1,4 @@
-import {render, replace } from '../framework/render.js';
+import { remove, render, replace } from '../framework/render.js';
 import EditPointView from '../view/edit-point-view.js';
 import PointView from '../view/point-view.js';
 
@@ -29,6 +29,11 @@ export default class PointPresenter {
     );
   }
 
+  removePoint() {
+    remove(this.pointView);
+    remove(this.editPointView);
+  }
+
   init() {
     this.createPoint(this.point);
     render(this.pointView, this.#pointsContaner.element);
@@ -52,7 +57,7 @@ export default class PointPresenter {
     const updatedPoint = this.pointsModel.updateFavorite(this.pointId);
     const oldPointView = this.pointView;
     this.createPoint(updatedPoint);
-    replace(this.pointView,oldPointView);
+    replace(this.pointView, oldPointView);
   }
 
 }

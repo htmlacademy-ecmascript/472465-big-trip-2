@@ -2,16 +2,23 @@ import { allPoints } from '../mock/point-mock.js';
 import { allOffers } from '../mock/offer-mock.js';
 import { cities } from '../mock/destination-info.js';
 import { destinations } from '../mock/destination-mock.js';
-
+import { PointsSortModel } from './points-sort-model.js';
+import { PointsFilterModel } from './points-filter-model.js';
 
 export default class PointsModel {
-  #allPoints;
-  #possibleOffers;
-  #allOfferTypes;
-  #allCities;
-  #destinations;
-  #fullDataList;
-  #pointIdDictionary;
+  #allPoints = null;
+  #possibleOffers = null;
+  #allOfferTypes = null;
+  #allCities = null;
+  #destinations = null;
+  #fullDataList = null;
+  #pointIdDictionary = null;
+  #sortModel = null;
+  #filterModel = null;
+  constructor() {
+    this.#filterModel = new PointsFilterModel(this.fullDataList);
+    this.#sortModel = new PointsSortModel(this.fullDataList);
+  }
 
   get points() {
     if (!this.#allPoints) {
@@ -53,6 +60,18 @@ export default class PointsModel {
       this.#datalistInit();
     }
     return this.#fullDataList;
+  }
+
+  resetSortPoints(newPoints) {
+    this.#sortModel.resetPonts(newPoints);
+  }
+
+  getFilteredPoints(filterType) {
+    return this.#filterModel.filterPoints(filterType);
+  }
+
+  getSortedPoints(sortType) {
+    return this.#sortModel.sortPoints(sortType);
   }
 
   setPointIdDictionary() {
