@@ -1,7 +1,7 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getPointDate } from '../utils/utils.js';
 
-function createPointTemplate(point, destination, offers) {
+function createPointTemplate(point, destination, offers, isFavorite) {
   function getOffersItem(offer) {
     return `
           <li class="event__offer">
@@ -39,7 +39,7 @@ function createPointTemplate(point, destination, offers) {
             <ul class="event__selected-offers">
               ${offers.map(getOffersItem).join('')}
             </ul>
-            <button class="event__favorite-btn event__favorite-btn${point.isFavorite ? '--active' : ''}" type="button">
+            <button class="event__favorite-btn event__favorite-btn${isFavorite ? '--active' : ''}" type="button">
               <span class="visually-hidden">Add to favorite</span>
               <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
                 <path
@@ -54,7 +54,7 @@ function createPointTemplate(point, destination, offers) {
   `;
 }
 
-export default class PointView extends AbstractView {
+export default class PointView extends AbstractStatefulView {
   #onRollupClick = null;
   #onFavorite = null;
   #favoriteButton = null;
@@ -62,16 +62,21 @@ export default class PointView extends AbstractView {
     super();
     this.#onFavorite = onFavoriteClick;
     this.point = point;
+    this._state = { isFavorite: this.point.isFavorite };
     this.destination = destination;
     this.offers = offers;
     this.#onRollupClick = onRollUpClick;
+    this._restoreHandlers();
+  }
+
+  _restoreHandlers() {
     this.#favoriteButton = this.element.querySelector('.event__favorite-btn');
     this.#favoriteButton.addEventListener('click', this.#onFavoriteClickHandler.bind(this));
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onRollupClickHandler.bind(this));
   }
 
   get template() {
-    return createPointTemplate(this.point, this.destination, this.offers, this.allCities);
+    return createPointTemplate(this.point, this.destination, this.offers, this._state.isFavorite);
   }
 
   #onRollupClickHandler(evt) {
@@ -79,8 +84,8 @@ export default class PointView extends AbstractView {
     this.#onRollupClick();
   }
 
-  #onFavoriteClickHandler(evt){
+  #onFavoriteClickHandler(evt) {
     evt.preventDefault();
-    this.#onFavorite();
+    this.#onFavorite(!this._state.isFavorite);
   }
 }

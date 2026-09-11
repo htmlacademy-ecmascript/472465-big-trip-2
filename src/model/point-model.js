@@ -11,10 +11,13 @@ export default class PointsModel {
   #allOfferTypes = null;
   #allCities = null;
   #destinations = null;
+  #destinationsById = null;
+  #destinationsByName = null;
   #fullDataList = null;
   #pointIdDictionary = null;
   #sortModel = null;
   #filterModel = null;
+
   constructor() {
     this.#filterModel = new PointsFilterModel(this.fullDataList);
     this.#sortModel = new PointsSortModel(this.fullDataList);
@@ -55,6 +58,20 @@ export default class PointsModel {
     return this.#destinations;
   }
 
+  get destinationsById() {
+    if (!this.#destinationsById) {
+      this.#destinationsById = destinations.reduce(this.#setByProp('id'), {});
+    }
+    return this.#destinationsById;
+  }
+
+  get destinationsByName() {
+    if (!this.#destinationsByName) {
+      this.#destinationsByName = destinations.reduce(this.#setByProp('name'), {});
+    }
+    return this.#destinationsByName;
+  }
+
   get fullDataList() {
     if (!this.#fullDataList) {
       this.#datalistInit();
@@ -81,42 +98,28 @@ export default class PointsModel {
     }
   }
 
-  updateFavorite = (pointId) => {
+  updateFavorite(pointId, favoriteState) {
     const updatedPoint = this.#pointIdDictionary[pointId];
-    updatedPoint.point.isFavorite = !updatedPoint.point.isFavorite;
-    return updatedPoint;
-  };
+    updatedPoint.point.isFavorite = favoriteState;
+  }
+
+  offersByType(pointType) {
+    function getOffersByType(el) {
+      return el.type === pointType;
+    }
+    return this.possibleOffers.filter(getOffersByType)[0].offers;
+  }
 
   #datalistInit() {
-    let ownOffersMap;
-    let pointItem;
-
-    function getOffersCombine(id) {
-      return ownOffersMap[id];
-    }
-
-    function getDestinationById(el) {
-      return el.id === pointItem.destination;
-    }
-
-    function getOffersByType(el) {
-      return el.type === pointItem.type;
-    }
 
     this.#fullDataList = [];
+
     /* определение принадлежности предложений, пунктов назначений к точкам */
     for (const p of this.points) {
-      pointItem = p;
-
-      const allOffersByType = this.possibleOffers.filter(getOffersByType)[0].offers; /* определение типа всех возможных предложений точки*/
-      ownOffersMap = allOffersByType.reduce((acc, el) => {
-        acc[el.id] = el;
-        return acc;
-      }, {}); /*создание словаря, чтобы исключить циклы для поиска опций*/
-
-
-      const destination = this.destinations.find(getDestinationById); /* определение принадлежности пункта назхначения к точке*/
-      const pointOffers = p.offers.map(getOffersCombine); /* добавление всех предложений относящихся к данной точке*/
+      const allOffersByType = this.offersByType(p.type); /* определение типа всех возможных предложений точки*/
+      const ownOffersMap = allOffersByType.reduce(this.#setByProp('id'), {}); /*создание словаря, чтобы исключить циклы для поиска опций*/
+      const destination = this.destinationsById[p.destination]; /* определение принадлежности пункта назхначения к точке*/
+      const pointOffers = p.offers.map((id) => ownOffersMap[id]); /* добавление всех предложений относящихся к данной точке*/
 
       this.#fullDataList.push(
         {
@@ -131,4 +134,12 @@ export default class PointsModel {
     /* определение принадлежности предложений, пунктов назначений к точкам */
     this.setPointIdDictionary(); /*собрать справочник по  id точки*/
   }
+
+  #setByProp(prop) {
+    return function handlerByProp(set, item) {
+      set[item[prop]] = item;
+      return set;
+    };
+  }
+
 }
