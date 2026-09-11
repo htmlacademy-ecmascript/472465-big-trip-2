@@ -26,7 +26,21 @@ export default class PointPresenter {
       this.cities,
       this.closePoint.bind(this),
       this.#saveEditPoint.bind(this),
+      this.#onDestination.bind(this),
+      this.#onEventType.bind(this),
     );
+  }
+
+  #updatePointsViews() {
+    this.editPointView.updateElement({
+      offers: this.point.offers,
+      basePrice: this.point.point.basePrice,
+      dateFrom: this.point.point.dateFrom,
+      dateTo: this.point.point.dateTo,
+      pointType: this.point.point.type,
+      possibleOffers: this.point.possibleOffers,
+      destination: this.point.destination,
+    });
   }
 
   removePoint() {
@@ -46,6 +60,7 @@ export default class PointPresenter {
 
   closePoint() {
     this.onClosePoint();
+    this.#updatePointsViews();
     replace(this.pointView, this.editPointView);
   }
 
@@ -53,11 +68,25 @@ export default class PointPresenter {
     console.log('its save');
   }
 
-  #onFavorite() {
-    const updatedPoint = this.pointsModel.updateFavorite(this.pointId);
-    const oldPointView = this.pointView;
-    this.createPoint(updatedPoint);
-    replace(this.pointView, oldPointView);
+  #onFavorite(favoriteState) {
+    this.pointsModel.updateFavorite(this.pointId, favoriteState);
+    this.pointView.updateElement({ isFavorite: favoriteState });
   }
 
+  #onDestination(cityName) {
+    const newDestination = this.pointsModel.destinationsByName[cityName];
+    this.editPointView.updateElement({
+      destination: newDestination,
+      offers: [],
+    });
+  }
+
+  #onEventType(newType) {
+    const newOffersByType = this.pointsModel.offersByType(newType);
+    this.editPointView.updateElement({
+      pointType: newType,
+      offers: [],
+      possibleOffers: newOffersByType,
+    });
+  }
 }

@@ -4,7 +4,7 @@ import { cities, cityDescriptions, imageDescriptions } from './destination-info.
 const PREFIX = 'DEST';
 const DESTCOUNT = cities.length;
 const IMAGEPATH = 'https://loremflickr.com/248/152?random=';
-
+let cityNum = 0;
 class DestinationData {
   constructor() {
     this.cities = cities;
@@ -37,7 +37,10 @@ class DestinationData {
   }
 
   getDestination() {
-    const cityNum = getRandomNum(cities.length - 1);
+    if (cityNum > DESTCOUNT) {
+      cityNum = 0;
+    }
+    cityNum++;
     return {
       name: this.cities[cityNum],
       id: this.getId(),
@@ -52,3 +55,4 @@ export const destinations = (function getDestinations() {
   return Array.
     from({ length: DESTCOUNT }, destCombain.getDestination.bind(destCombain));
 }());
+
