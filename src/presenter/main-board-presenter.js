@@ -6,7 +6,6 @@ import PointsModel from '../model/point-model.js';
 import EmptyListView from '../view/empty-list-veiw.js';
 import PointsListPresenter from './points-list-presenter.js';
 import { EMPTY_MASSAGE } from '../utils/const.js';
-import S from '../view/test.js';
 
 
 
