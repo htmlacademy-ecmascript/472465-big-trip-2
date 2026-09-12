@@ -4,12 +4,13 @@ import PointView from '../view/point-view.js';
 
 export default class PointPresenter {
   #pointsContaner = null;
+  #onClosePoint = null;
   constructor({ point, cities, pointsContaner, onOpen, onClose, pointsModel }) {
     this.pointsModel = pointsModel;
     this.point = point;
     this.cities = cities;
     this.onOpenPoint = onOpen;
-    this.onClosePoint = onClose;
+    this.#onClosePoint = onClose;
     this.#pointsContaner = pointsContaner;
     this.pointId = point.point.id;
   }
@@ -24,10 +25,11 @@ export default class PointPresenter {
     this.editPointView = new EditPointView(
       this.point,
       this.cities,
-      this.closePoint.bind(this),
+      this.#closePoint.bind(this),
       this.#saveEditPoint.bind(this),
       this.#onDestination.bind(this),
       this.#onEventType.bind(this),
+      this.#onDateChange.bind(this),
     );
   }
 
@@ -58,8 +60,8 @@ export default class PointPresenter {
     replace(this.editPointView, this.pointView);
   }
 
-  closePoint() {
-    this.onClosePoint();
+  #closePoint() {
+    this.#onClosePoint();
     this.#updatePointsViews();
     replace(this.pointView, this.editPointView);
   }
@@ -89,4 +91,9 @@ export default class PointPresenter {
       possibleOffers: newOffersByType,
     });
   }
+
+  #onDateChange(dateChanges) {
+    this.editPointView.updateElement(dateChanges);
+  }
+
 }

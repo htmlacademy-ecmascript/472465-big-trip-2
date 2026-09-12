@@ -1,9 +1,9 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { getPointDate } from '../utils/utils.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/themes/material_blue.css';
 
-
-function createEditPointForm({cities, offersTypes, state }) {
-
+function createEditPointForm({ cities, offersTypes, state }) {
   const startDate = getPointDate(state.dateFrom);
   const endDate = getPointDate(state.dateTo);
 
@@ -132,6 +132,8 @@ export default class EditPointView extends AbstractStatefulView {
   #submitButton = null;
   #onDestination = null;
   #onEventType = null;
+  #onDateChange = null;
+  #calenders = null;
   constructor(
     { point, destination, offers, possibleOffers, offersTypes },
     cities,
@@ -139,12 +141,14 @@ export default class EditPointView extends AbstractStatefulView {
     onSubmit,
     onDestination,
     onEventType,
+    onDateChange,
   ) {
     super();
     this.#onRollupClick = onRollUpClick;
     this.#onSubmit = onSubmit;
     this.#onDestination = onDestination;
     this.#onEventType = onEventType;
+    this.#onDateChange = onDateChange;
     this.point = point;
     this.allCities = cities;
     this.offersTypes = offersTypes;
@@ -168,6 +172,8 @@ export default class EditPointView extends AbstractStatefulView {
     this.element.querySelector('.event__input--price').addEventListener('change', this.#onPriceChange.bind(this));
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#onDestinationChange.bind(this));
     this.element.querySelector('.event__type-group').addEventListener('click', this.#onEventTypeClick.bind(this));
+    this.element.querySelector('.event__type-group').addEventListener('click', this.#onEventTypeClick.bind(this));
+    this.#setDatePicker();
   }
 
   get template() {
@@ -176,6 +182,23 @@ export default class EditPointView extends AbstractStatefulView {
       cities: this.allCities,
       offersTypes: this.offersTypes,
     });
+  }
+
+  #setDatePicker() {
+    [this.startTimeField, this.endTimeField] = this.element.querySelectorAll('.event__input--time');
+    const config = {
+      enableTime: true,
+      dateFormat: 'd/m/Y H:i',
+      onChange: this.#onDateChangeHandler.bind(this)
+    };
+    const startDateCalendar = flatpickr(this.startTimeField, { ...config, maxDate: this._state.dateTo });
+    const endDateCalendar = flatpickr(this.endTimeField, { ...config, minDate: this._state.dateFrom });
+    this.#calenders = [startDateCalendar, endDateCalendar];
+  }
+
+  #destrtoyPicker() {
+    this.#calenders.forEach((calendar) => { calendar.destroy() })
+    this.calendar = null;
   }
 
   #onRollUpClickHandler(evt) {
@@ -221,6 +244,19 @@ export default class EditPointView extends AbstractStatefulView {
     const newEventType = evt.target.value;
     if (evt.target.classList.contains('event__type-input') && newEventType !== this._state.pointType) {
       this.#onEventType(newEventType);
+    }
+  }
+
+  #onDateChangeHandler(sd, dstr, inst) {
+    switch (inst.input.name) {
+      case 'event-start-time':
+        this.#destrtoyPicker();
+        this.#onDateChange({ dateFrom: new Date(sd[0]).toJSON() });
+        break;
+      case 'event-end-time':
+        this.#destrtoyPicker();
+        this.#onDateChange({ dateTo: new Date(sd[0]).toJSON() })
+        break;
     }
   }
 }
